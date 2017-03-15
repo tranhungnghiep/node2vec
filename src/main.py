@@ -119,7 +119,7 @@ def parse_args():
 
     parser.add_argument('--workers', type=int, default=60,
                         help='Number of parallel workers. More threads than cores is a typical technique to speed up. \n\
-                            Should use [60] workers on 32 cores.')
+                            Should use [60] workers on 32 cores. (Should also run many instances of node2vec for many networks.)')
 
     return parser.parse_args()
 
