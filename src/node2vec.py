@@ -1,7 +1,8 @@
 import numpy as np
+np.random.seed(7)
 import networkx as nx
 import random
-
+random.seed(7)
 
 class Graph():
 	def __init__(self, nx_G, is_directed, p, q):
