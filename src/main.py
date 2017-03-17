@@ -33,7 +33,7 @@ def parse_args():
 
     parser.add_argument('--num-walks', type=int, default=20,
                         help='Number of walks per source. Default node2vec is 10. Default deepwalk is 10. More num walk is better, but complexity of walk sampling is high. \n\
-                            Should try [20].')
+                            Should try [20] or 50.')
 
     parser.add_argument('--walk-length', type=int, default=50,
                         help='Length of walk per source. Default node2vec is 80. Default deepwalk is 40. More walk length is better, but complexity of walk sampling is high. \n\
