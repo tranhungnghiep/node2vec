@@ -103,8 +103,12 @@ def parse_args():
 
     # AUTOMATE RUNNING:
     print('First try, use (new) default params.')
+
     largs.root_path_input = '/mnt/storage/private/nghiep/Data/MAG/Unzip/CitCount6n'
-    largs.root_path_output = '/mnt/storage/private/nghiep/Data/CitationCount/MAG7/Embeddings'
+    largs.root_path_output = '/mnt/storage/private/nghiep/Data/CitationCount/MAG/Embeddings/MAG7'
+    if not os.path.isdir(largs.root_path_output):
+        os.makedirs(largs.root_path_output)
+
     if largs.mag_file == 1:
         largs.input = os.path.join(largs.root_path_input, 'PAPER_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
         largs.output = os.path.join(largs.root_path_output, 'PAPER_CITATION_EMB_' + str(largs.test_year) + '.txt')
