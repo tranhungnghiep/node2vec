@@ -209,5 +209,14 @@ if __name__ == "__main__":
 """
 Note:
 - Each time running produce a very different tsne, which means the embedding is not stable.
-    -> make sure it converges: increase all.
+    -> make sure it converges: increase walklength, numwalk to let random walks capture more info of network, increase dimension to let embedding capture more info of random walks, increase interation to let embedding converge.
+- Node2vec walk sampling is not parallel: try using deepwalk?
+    -> code deepwalk is messy: no weighted, directed is not sure, parallel walk sampling seems just a trick using an online iterator of random walks.
+    => 2 ways to parallelize random walk:
+        1. iterator trick using 'yield': not sure it would work: check/test.
+            -> iterator is stateful, it is sequential.
+                The only way to parallelize is to use multiple iterators for multiple process, and control the starting point of each iterator.
+                And slow iterator is a known issue with parallel gensim w2v.
+                => cannot do this with gensim.
+        2. parallel compute walks, may use map (with chunk size), may use apply_async?
 """
