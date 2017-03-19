@@ -94,9 +94,9 @@ def parse_args():
                         help='Test year. Default 1996.')
 
     parser.add_argument('--parallel-node2vec', dest='parallel_node2vec', action='store_true',
-                        help='Parallel preprocessing transition probs and simulating walks or not. Default is parallel.')
+                        help='Parallel preprocessing transition probs and simulating walks or not. Default is not parallel.')
     parser.add_argument('--no-parallel-node2vec', dest='parallel_node2vec', action='store_false')
-    parser.set_defaults(parallel_node2vec=True)
+    parser.set_defaults(parallel_node2vec=False)
 
     largs = parser.parse_args()
 
@@ -253,6 +253,7 @@ def main(args):
     print('FINISH.')
     stop_time_main = time.time()
     print('Time (s): ' + str(stop_time_main-start_time_main))
+
 
 if __name__ == "__main__":
     args = parse_args()
