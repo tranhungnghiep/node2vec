@@ -19,6 +19,11 @@ from gensim.models import Word2Vec
 import random
 random.seed(7)
 
+import time
+import multiprocessing
+import node2vec_parallel
+
+
 def parse_args():
     '''
     Parses the node2vec arguments.
@@ -88,9 +93,15 @@ def parse_args():
     parser.add_argument('--test-year', type=int, default=1996,
                         help='Test year. Default 1996.')
 
+    parser.add_argument('--parallel-node2vec', dest='parallel_node2vec', action='store_true',
+                        help='Parallel preprocessing transition probs and simulating walks or not. Default is parallel.')
+    parser.add_argument('--no-parallel-node2vec', dest='parallel_node2vec', action='store_false')
+    parser.set_defaults(parallel_node2vec=True)
+
     largs = parser.parse_args()
 
     # TEST:
+    # largs.directed = True
     # largs.weighted = True
     largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate.edgelist'
     largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate.emb'
@@ -102,48 +113,49 @@ def parse_args():
     # largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate_w_str.emb'
 
     # AUTOMATE RUNNING:
-    print('First try, use (new) default params.')
+    if largs.mag_file != 0:
+        print('First try, use (new) default params.')
 
-    largs.root_path_input = '/mnt/storage/private/nghiep/Data/MAG/Unzip/CitCount6n'
-    largs.root_path_output = '/mnt/storage/private/nghiep/Data/CitationCount/MAG/Embeddings/MAG7'
-    if not os.path.isdir(largs.root_path_output):
-        os.makedirs(largs.root_path_output)
+        largs.root_path_input = '/mnt/storage/private/nghiep/Data/MAG/Unzip/CitCount6n'
+        largs.root_path_output = '/mnt/storage/private/nghiep/Data/CitationCount/MAG/Embeddings/MAG7'
+        if not os.path.isdir(largs.root_path_output):
+            os.makedirs(largs.root_path_output)
 
-    if largs.mag_file == 1:
-        largs.input = os.path.join(largs.root_path_input, 'PAPER_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
-        largs.output = os.path.join(largs.root_path_output, 'PAPER_CITATION_EMB_' + str(largs.test_year) + '.txt')
-        largs.directed = True
-        largs.weighted = False
-    elif largs.mag_file == 2:
-        largs.input = os.path.join(largs.root_path_input, 'AUTHOR_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
-        largs.output = os.path.join(largs.root_path_output, 'AUTHOR_CITATION_EMB_' + str(largs.test_year) + '.txt')
-        largs.directed = True
-        largs.weighted = True
-    elif largs.mag_file == 3:
-        largs.input = os.path.join(largs.root_path_input, 'VENUE_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
-        largs.output = os.path.join(largs.root_path_output, 'VENUE_CITATION_EMB_' + str(largs.test_year) + '.txt')
-        largs.directed = True
-        largs.weighted = True
-    elif largs.mag_file == 4:
-        largs.input = os.path.join(largs.root_path_input, 'PAPER_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '.txt')
-        largs.output = os.path.join(largs.root_path_output, 'PAPER_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '.txt')
-        largs.directed = False
-        largs.weighted = True
-    elif largs.mag_file == 5:
-        largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_PAPER_NETWORK_' + str(largs.test_year) + '.txt')
-        largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_PAPER_EMB_' + str(largs.test_year) + '.txt')
-        largs.directed = False
-        largs.weighted = True
-    elif largs.mag_file == 6:
-        largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_VENUE_NETWORK_' + str(largs.test_year) + '.txt')
-        largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_VENUE_EMB_' + str(largs.test_year) + '.txt')
-        largs.directed = False
-        largs.weighted = True
-    elif largs.mag_file == 7:
-        largs.input = os.path.join(largs.root_path_input, 'VENUE_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '.txt')
-        largs.output = os.path.join(largs.root_path_output, 'VENUE_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '.txt')
-        largs.directed = False
-        largs.weighted = True
+        if largs.mag_file == 1:
+            largs.input = os.path.join(largs.root_path_input, 'PAPER_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'PAPER_CITATION_EMB_' + str(largs.test_year) + '.txt')
+            largs.directed = True
+            largs.weighted = False
+        elif largs.mag_file == 2:
+            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_CITATION_EMB_' + str(largs.test_year) + '.txt')
+            largs.directed = True
+            largs.weighted = True
+        elif largs.mag_file == 3:
+            largs.input = os.path.join(largs.root_path_input, 'VENUE_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'VENUE_CITATION_EMB_' + str(largs.test_year) + '.txt')
+            largs.directed = True
+            largs.weighted = True
+        elif largs.mag_file == 4:
+            largs.input = os.path.join(largs.root_path_input, 'PAPER_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'PAPER_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '.txt')
+            largs.directed = False
+            largs.weighted = True
+        elif largs.mag_file == 5:
+            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_PAPER_NETWORK_' + str(largs.test_year) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_PAPER_EMB_' + str(largs.test_year) + '.txt')
+            largs.directed = False
+            largs.weighted = True
+        elif largs.mag_file == 6:
+            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_VENUE_NETWORK_' + str(largs.test_year) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_VENUE_EMB_' + str(largs.test_year) + '.txt')
+            largs.directed = False
+            largs.weighted = True
+        elif largs.mag_file == 7:
+            largs.input = os.path.join(largs.root_path_input, 'VENUE_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'VENUE_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '.txt')
+            largs.directed = False
+            largs.weighted = True
 
     return largs
 
@@ -159,7 +171,7 @@ def read_graph():
             G = nx.read_edgelist(args.input, nodetype=int, create_using=nx.DiGraph())
             for edge in G.edges():
                 G[edge[0]][edge[1]]['weight'] = 1
-    except TypeError:  # Use string ID.
+    except TypeError:  # Use Node type str.
         if args.weighted:
             G = nx.read_edgelist(args.input, nodetype=str, data=(('weight', float),), create_using=nx.DiGraph())
         else:
@@ -177,29 +189,70 @@ def learn_embeddings(walks):
     '''
     Learn embeddings by optimizing the Skipgram objective using SGD.
     '''
-    walks = [map(str, walk) for walk in walks]
-    model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0,
-                     sg=1, negative=args.negative_sample,
-                     workers=args.workers, iter=args.iter,
-                     seed=7)  # Init and train, use skip-gram with negative sampling.
+
+    try:
+        model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0,
+                         sg=1, negative=args.negative_sample,
+                         workers=args.workers, iter=args.iter,
+                         seed=7)  # Init and train, use skip-gram with negative sampling.
+    except TypeError:  # Node type: int convert to str.
+        if len(walks) > 10**6:  # Small size is not worth parallel convert int to str.
+            pool = multiprocessing.Pool(args.workers)
+            walks = pool.map(mapstr, walks)
+        else:
+            walks = [map(str, walk) for walk in walks]
+        model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0,
+                         sg=1, negative=args.negative_sample,
+                         workers=args.workers, iter=args.iter,
+                         seed=7)  # Init and train, use skip-gram with negative sampling.
+
     try:
         model.save_word2vec_format(args.output)
-    except DeprecationWarning:
-        model.wv.save_word2vec_format(args.output)  # update code to new version of gensim.
+    except DeprecationWarning:  # Update code to new version of gensim.
+        model.wv.save_word2vec_format(args.output)
 
     return
+
+
+def mapstr(walk):
+    """
+    Helper function for parallel convert node type from int to str.
+    :param walk: list of int.
+    :return: list of str.
+    """
+
+    return map(str, walk)
 
 
 def main(args):
     '''
     Pipeline for representational learning for all nodes in a graph.
     '''
-    nx_G = read_graph()
-    G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
-    G.preprocess_transition_probs()
-    walks = G.simulate_walks(args.num_walks, args.walk_length)
-    learn_embeddings(walks)
 
+    print('START.')
+    start_time_main = time.time()  # in second.
+
+    base_time = time.time()
+    nx_G = read_graph()
+    print('Read graph time: ' + str(time.time() - base_time)); base_time = time.time()
+
+    if args.parallel_node2vec:
+        G = node2vec_parallel.Graph(nx_G, args.directed, args.p, args.q, args.workers)
+    else:
+        G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
+
+    G.preprocess_transition_probs()
+    print('Preprocess transition probability time: ' + str(time.time() - base_time)); base_time = time.time()
+
+    walks = G.simulate_walks(args.num_walks, args.walk_length)
+    print('Simulate walks ' + '(Parallel=' + str(args.parallel_node2vec) + ') time : ' + str(time.time() - base_time)); base_time = time.time()
+
+    learn_embeddings(walks)
+    print('Compute w2v embeddings time: ' + str(time.time() - base_time)); base_time = time.time()
+
+    print('FINISH.')
+    stop_time_main = time.time()
+    print('Time (s): ' + str(stop_time_main-start_time_main))
 
 if __name__ == "__main__":
     args = parse_args()
@@ -211,12 +264,13 @@ Note:
 - Each time running produce a very different tsne, which means the embedding is not stable.
     -> make sure it converges: increase walklength, numwalk to let random walks capture more info of network, increase dimension to let embedding capture more info of random walks, increase interation to let embedding converge.
 - Node2vec walk sampling is not parallel: try using deepwalk?
-    -> code deepwalk is messy: no weighted, directed is not sure, parallel walk sampling seems just a trick using an online iterator of random walks.
+    -> code deepwalk is messy: no weighted, directed is not sure, parallel walk sampling seems just a trick using an online generator of random walks.
     => 2 ways to parallelize random walk:
-        1. iterator trick using 'yield': not sure it would work: check/test.
-            -> iterator is stateful, it is sequential.
-                The only way to parallelize is to use multiple iterators for multiple process, and control the starting point of each iterator.
-                And slow iterator is a known issue with parallel gensim w2v.
-                => cannot do this with gensim.
-        2. parallel compute walks, may use map (with chunk size), may use apply_async?
+        1. generator trick using 'yield': not sure it would work: check/test.
+            -> generator is stateful, it is sequential.
+                The only way to parallelize generator is to use multiple iterators for multiple process, and control the starting point of each generator.
+                And slow iterator/generator is a known issue with parallel gensim w2v.
+                => cannot use generator to parallelize.
+        2. => the only way is parallel sampling walks, may use map (with chunk size), may use apply_async?
+            -> parallel is too complicated. because cannot share instance data between processes. => stop.
 """
