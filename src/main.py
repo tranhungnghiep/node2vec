@@ -81,6 +81,7 @@ def parse_args():
     parser.add_argument('--undirected', dest='directed', action='store_false')  # Same error here.
     parser.set_defaults(directed=False)
 
+
     parser.add_argument('--root-path-input',
                         help='Root path input. Default: None.')
 
@@ -98,19 +99,25 @@ def parse_args():
     parser.add_argument('--no-parallel-node2vec', dest='parallel_node2vec', action='store_false')
     parser.set_defaults(parallel_node2vec=False)
 
+
+    parser.add_argument('--no-test', dest='test', action='store_false',
+                        help='Do not use test param value. Accept passed param. Default use test param value.')
+    parser.set_defaults(test=True)
+
     largs = parser.parse_args()
 
     # TEST:
-    # largs.directed = True
-    # largs.weighted = True
-    largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate.edgelist'
-    largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate.emb'
-    # largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate_str.edgelist'
-    # largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate_str.emb'
-    # largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate_w.edgelist'
-    # largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate_w.emb'
-    # largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate_w_str.edgelist'
-    # largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate_w_str.emb'
+    if largs.test:
+        # largs.directed = True
+        # largs.weighted = True
+        largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate.edgelist'
+        largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate.emb'
+        # largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate_str.edgelist'
+        # largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate_str.emb'
+        # largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate_w.edgelist'
+        # largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate_w.emb'
+        # largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate_w_str.edgelist'
+        # largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate_w_str.emb'
 
     # AUTOMATE RUNNING:
     if largs.mag_file != 0:
