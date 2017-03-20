@@ -137,7 +137,7 @@ def simulate_walks_sharedarray(num_walks, walk_length):
     for walk_iter in range(num_walks):
         print(str(walk_iter + 1), '/', str(num_walks))
         random.shuffle(nodes)
-        pool.map(node2vec_walk_parallel_sharedarray, [(walk_length, node, walks_array, walk_iter, len(nodes), node_position) for node_position, node in enumerate(nodes)])  # Error: ValueError: ctypes objects containing pointers cannot be pickled. TODO: convert string id to int id or use char array.
+        pool.map(node2vec_walk_parallel_sharedarray, [(walk_length, node, walks_array, walk_iter, len(nodes), node_position) for node_position, node in enumerate(nodes)])  # Error: ValueError: ctypes objects containing pointers cannot be pickled. TODO: convert string id to int id or use char array. But passing to map is pickling, still slow? Using global var is making copies, cannot collect data?
 
     pool.close()
     pool.join()

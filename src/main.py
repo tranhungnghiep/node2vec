@@ -119,6 +119,8 @@ def parse_args():
         # largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate_w_str.edgelist'
         # largs.output = '/Users/mac/PythonProjects/node2vec/emb/karate_w_str.emb'
 
+        # largs.parallel_node2vec = True
+
     # AUTOMATE RUNNING:
     if largs.mag_file != 0:
         print('First try, use (new) default params.')
@@ -203,7 +205,7 @@ def learn_embeddings(walks):
                          workers=args.workers, iter=args.iter,
                          seed=7)  # Init and train, use skip-gram with negative sampling.
     except TypeError:  # Node type: int convert to str.
-        if len(walks) > 10**6:  # Small size is not worth parallel convert int to str.
+        if 1+1 == 0 and len(walks) > 10**6:  # Small size is not worth parallel convert int to str.
             pool = multiprocessing.Pool(args.workers)
             walks = pool.map(mapstr, walks)
             pool.close()
@@ -245,7 +247,7 @@ def main(args):
     nx_G = read_graph()
     print('Read graph time: ' + str(time.time() - base_time)); base_time = time.time()
 
-    if args.parallel_node2vec:
+    if 1+1 == 0 and args.parallel_node2vec:
         G = node2vec_parallel.Graph(nx_G, args.directed, args.p, args.q, args.workers)
     else:
         G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
@@ -254,7 +256,7 @@ def main(args):
     print('Preprocess transition probability time: ' + str(time.time() - base_time)); base_time = time.time()
 
     walks = G.simulate_walks(args.num_walks, args.walk_length)
-    print('Simulate walks ' + '(Parallel=' + str(args.parallel_node2vec) + ') time : ' + str(time.time() - base_time)); base_time = time.time()
+    print('Simulate walks ' + '(Parallel=' + str(1+1==0 and args.parallel_node2vec) + ') time : ' + str(time.time() - base_time)); base_time = time.time()
 
     learn_embeddings(walks)
     print('Compute w2v embeddings time: ' + str(time.time() - base_time)); base_time = time.time()
