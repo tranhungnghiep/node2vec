@@ -116,7 +116,7 @@ def parse_args():
     if largs.mag_file != 0:
         print('First try, use (new) default params.')
 
-        largs.root_path_input = '/mnt/storage/private/nghiep/Data/MAG/Unzip/CitCount6n'
+        largs.root_path_input = '/mnt/storage/private/nghiep/Data/MAG/Unzip/CitCount'
         largs.root_path_output = '/mnt/storage/private/nghiep/Data/CitationCount/MAG/Embeddings/MAG7'
         if not os.path.isdir(largs.root_path_output):
             os.makedirs(largs.root_path_output)
