@@ -289,14 +289,8 @@ Note:
         -> when returning big result, it becomes the bottleneck and process goes to sleep.
             => need to use shared memory directly, as in Java.
                 -> Python has some supports for this: shared ctypes with multiprocessing.Array(lock=False), multiprocessing.sharedctypes.RawArray
-                e.g.:
-                    n, m = 2, 3
-                    mp_arr = mp.Array(c.c_double, n*m) # shared, can be used from multiple processes
-                    arr = np.frombuffer(mp_arr.get_obj()) # mp_arr and arr share the same memory *** Note: cannot frombuffer array containing pointer (like str).
-                    # make it two-dimensional
-                    b = arr.reshape((n,m)) # b and arr share the same memory
-                    walks = b.tolist()
                 (Note that Manager() is not directly shared memory, it is a central process memory, it needs to serialize and deserialize (pickle/unpickle) object to send between process: so it's also slow.)
     * Moreover, global vars are copied even though subprocesses do not modify it.
         This is because refcount of the vars are changed.
+==> parallel processing on python is a failure.
 """
