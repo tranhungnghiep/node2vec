@@ -95,19 +95,19 @@ def parse_args():
                         help='Test year. Default 1996.')
 
     parser.add_argument('--parallel-node2vec', dest='parallel_node2vec', action='store_true',
-                        help='Parallel preprocessing transition probs and simulating walks or not. Default is parallel.')
+                        help='Parallel preprocessing transition probs and simulating walks or not. Default is not parallel node2vec.')
     parser.add_argument('--no-parallel-node2vec', dest='parallel_node2vec', action='store_false')
-    parser.set_defaults(parallel_node2vec=True)
+    parser.set_defaults(parallel_node2vec=False)
 
 
-    parser.add_argument('--no-test', dest='test', action='store_false',
-                        help='Do not use test param value. Accept passed param. Default use test param value.')
-    parser.set_defaults(test=True)
+    parser.add_argument('--no-local-test', dest='local_test', action='store_false',
+                        help='Do not use test param value (for local test). Accept passed param. Default use test param value.')
+    parser.set_defaults(local_test=True)
 
     largs = parser.parse_args()
 
     # TEST:
-    if largs.test:
+    if largs.local_test:
         # largs.directed = True
         # largs.weighted = True
         largs.input = '/Users/mac/PythonProjects/node2vec/graph/karate.edgelist'
@@ -283,4 +283,20 @@ Note:
                 => cannot use generator to parallelize.
         2. => the only way is parallel sampling walks, may use map (with chunk size), may use apply_async?
             -> parallel is too complicated. because cannot share instance data between processes. => stop.
+
+- A problem with parallel node2vec:
+    * Result are returned through a pipe, the pipe's size is very small and slow.
+        -> when returning big result, it becomes the bottleneck and process goes to sleep.
+            => need to use shared memory directly, as in Java.
+                -> Python has some supports for this: shared ctypes with multiprocessing.Array(lock=False), multiprocessing.sharedctypes.RawArray
+                e.g.:
+                    n, m = 2, 3
+                    mp_arr = mp.Array(c.c_double, n*m) # shared, can be used from multiple processes
+                    arr = np.frombuffer(mp_arr.get_obj()) # mp_arr and arr share the same memory *** Note: cannot frombuffer array containing pointer (like str).
+                    # make it two-dimensional
+                    b = arr.reshape((n,m)) # b and arr share the same memory
+                    walks = b.tolist()
+                (Note that Manager() is not directly shared memory, it is a central process memory, it needs to serialize and deserialize (pickle/unpickle) object to send between process: so it's also slow.)
+    * Moreover, global vars are copied even though subprocesses do not modify it.
+        This is because refcount of the vars are changed.
 """

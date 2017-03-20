@@ -26,6 +26,7 @@ import random
 random.seed(7)
 
 import multiprocessing
+import ctypes
 
 
 g_G = None
@@ -49,28 +50,12 @@ class Graph:
     @staticmethod
     def simulate_walks(num_walks, walk_length):
         '''
-        Repeatedly simulate random walks from each node.
-
-        Parallel for each node. Using auto chunksize.
-        Note that map is like for-loop, it will call the func many times, and automatically distribute args to different processes.
-            So no need to parallel for each num_walk, as num_walks is very small.
+        Call parallel simulate_walks.
+        Default using pipe.
         '''
 
-        global g_G, g_workers
-        pool = multiprocessing.Pool(g_workers)
-
-        walks = []
-        nodes = list(g_G.nodes())
-        print('Walk iteration:')
-        for walk_iter in range(num_walks):
-            print(str(walk_iter + 1), '/', str(num_walks))
-            random.shuffle(nodes)
-            walks.extend(pool.map(node2vec_walk_parallel, [(walk_length, node) for node in nodes]))
-
-        pool.close()
-        pool.join()
-
-        return walks
+        return simulate_walks_pipe(num_walks, walk_length)
+        # return simulate_walks_sharedarray(num_walks, walk_length)
 
     @staticmethod
     def preprocess_transition_probs():
@@ -102,7 +87,66 @@ class Graph:
         return
 
 
-def node2vec_walk_parallel(args):
+def simulate_walks_pipe(num_walks, walk_length):
+    '''
+    Repeatedly simulate random walks from each node.
+
+    Parallel for each node. Using auto chunksize.
+    Note that map is like for-loop, it will call the func many times, and automatically distribute args to different processes.
+        So no need to parallel for each num_walk, as num_walks is very small.
+    '''
+
+    global g_G, g_workers
+    pool = multiprocessing.Pool(g_workers)
+
+    walks = []
+    nodes = list(g_G.nodes())
+
+    print('Walk iteration:')
+    for walk_iter in range(num_walks):
+        print(str(walk_iter + 1), '/', str(num_walks))
+        random.shuffle(nodes)
+        walks.extend(pool.map(node2vec_walk_parallel_pipe, [(walk_length, node) for node in nodes]))
+
+    pool.close()
+    pool.join()
+
+    return walks
+
+
+def simulate_walks_sharedarray(num_walks, walk_length):
+    '''
+    Repeatedly simulate random walks from each node.
+
+    Parallel for each node. Using auto chunksize.
+    Note that map is like for-loop, it will call the func many times, and automatically distribute args to different processes.
+        So no need to parallel for each num_walk, as num_walks is very small.
+
+    Use shared array of string to collect result from subprocesses. Need to carefully avoid conflict write.
+
+    Not working: cannot pass multiprocessing.Array() in map?
+    '''
+
+    global g_G, g_workers
+    pool = multiprocessing.Pool(g_workers)
+
+    nodes = list(g_G.nodes())
+    walks_array = multiprocessing.Array(ctypes.c_char_p, num_walks * len(nodes) * walk_length, lock=False)
+
+    print('Walk iteration:')
+    for walk_iter in range(num_walks):
+        print(str(walk_iter + 1), '/', str(num_walks))
+        random.shuffle(nodes)
+        pool.map(node2vec_walk_parallel_sharedarray, [(walk_length, node, walks_array, walk_iter, len(nodes), node_position) for node_position, node in enumerate(nodes)])  # Error: ValueError: ctypes objects containing pointers cannot be pickled. TODO: convert string id to int id or use char array.
+
+    pool.close()
+    pool.join()
+
+    # return np.frombuffer(walks_array, dtype=int).reshape((-1, walk_length)).tolist()  # This only work for non-pointer shared array. This numpy array use same memory with walks_array.
+    return np.array(walks_array[:]).reshape((-1, walk_length)).tolist()  # Be careful here.
+
+
+def node2vec_walk_parallel_pipe(args):
     '''
     Simulate a random walk starting from start node.
     '''
@@ -128,6 +172,43 @@ def node2vec_walk_parallel(args):
             break
 
     return walk
+
+
+def node2vec_walk_parallel_sharedarray(args):
+    '''
+    Simulate a random walk starting from start node.
+    '''
+    global g_G, g_alias_nodes, g_alias_edges
+
+    walk_length = args[0]
+    start_node = args[1]
+    walks_array = args[2]
+    walk_iter = args[3]
+    len_nodes = args[4]
+    node_position = args[5]
+
+    walk = [start_node]
+
+    while len(walk) < walk_length:
+        cur = walk[-1]
+        cur_nbrs = sorted(g_G.neighbors(cur))
+        if len(cur_nbrs) > 0:
+            if len(walk) == 1:
+                walk.append(cur_nbrs[alias_draw(g_alias_nodes[cur][0], g_alias_nodes[cur][1])])
+            else:
+                prev = walk[-2]
+                next = cur_nbrs[alias_draw(g_alias_edges[(prev, cur)][0],
+                                           g_alias_edges[(prev, cur)][1])]
+                walk.append(next)
+        else:
+            break
+
+    # e.g.:
+    # 0*100*50+0*50=0 -> [0:0+50] => ok.
+    # 0*100*50+5*50=250 -> [250:300] => ok.
+    # 1*100*50+0*50=5000 -> [5000:5050] => ok.
+    # 1*100*50+5*50=5250 -> [5250:5300] => ok.
+    walks_array[walk_iter * len_nodes * walk_length + node_position * walk_length:walk_iter * len_nodes * walk_length + (node_position+1) * walk_length] = walk  # Be careful here.
 
 
 def get_alias_edge(src, dst):
