@@ -206,6 +206,8 @@ def learn_embeddings(walks):
         if len(walks) > 10**6:  # Small size is not worth parallel convert int to str.
             pool = multiprocessing.Pool(args.workers)
             walks = pool.map(mapstr, walks)
+            pool.close()
+            pool.join()
         else:
             walks = [map(str, walk) for walk in walks]
         model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0,

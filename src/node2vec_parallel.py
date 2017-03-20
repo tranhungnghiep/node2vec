@@ -67,6 +67,9 @@ class Graph:
             random.shuffle(nodes)
             walks.extend(pool.map(node2vec_walk_parallel, [(walk_length, node) for node in nodes]))
 
+        pool.close()
+        pool.join()
+
         return walks
 
     @staticmethod
