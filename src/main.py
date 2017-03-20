@@ -70,16 +70,16 @@ def parse_args():
     parser.add_argument('--q', type=float, default=1,
                         help='Inout hyperparameter. Default is 1.')
 
+    parser.add_argument('--directed', dest='directed', action='store_true',
+                        help='Graph is (un)directed. Default is undirected.')
+    parser.add_argument('--undirected', dest='directed', action='store_false')  # Same error here.
+    parser.set_defaults(directed=False)
+
     parser.add_argument('--weighted', dest='weighted', action='store_true',
                         help='Boolean specifying (un)weighted. Default is unweighted.')
     parser.add_argument('--unweighted', dest='weighted',
                         action='store_false')  # Luckily correct here, but the code is wrong. Should use same dest.
     parser.set_defaults(weighted=False)
-
-    parser.add_argument('--directed', dest='directed', action='store_true',
-                        help='Graph is (un)directed. Default is undirected.')
-    parser.add_argument('--undirected', dest='directed', action='store_false')  # Same error here.
-    parser.set_defaults(directed=False)
 
 
     parser.add_argument('--root-path-input',
@@ -95,9 +95,9 @@ def parse_args():
                         help='Test year. Default 1996.')
 
     parser.add_argument('--parallel-node2vec', dest='parallel_node2vec', action='store_true',
-                        help='Parallel preprocessing transition probs and simulating walks or not. Default is not parallel.')
+                        help='Parallel preprocessing transition probs and simulating walks or not. Default is parallel.')
     parser.add_argument('--no-parallel-node2vec', dest='parallel_node2vec', action='store_false')
-    parser.set_defaults(parallel_node2vec=False)
+    parser.set_defaults(parallel_node2vec=True)
 
 
     parser.add_argument('--no-test', dest='test', action='store_false',
