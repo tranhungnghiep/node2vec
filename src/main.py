@@ -131,11 +131,11 @@ def parse_args():
             os.makedirs(largs.root_path_output)
 
         weight_threshold_2 = 2
-        weight_threshold_3 = 1
+        weight_threshold_3 = 2
         weight_threshold_4 = 2
         weight_threshold_5 = 2
-        weight_threshold_6 = 3
-        weight_threshold_7 = 1
+        weight_threshold_6 = 5
+        weight_threshold_7 = 2
 
         if largs.mag_file == 1:
             largs.input = os.path.join(largs.root_path_input, 'PAPER_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
