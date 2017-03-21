@@ -48,17 +48,17 @@ def parse_args():
                         help='Number of dimensions. Default node2vec is 128. Default deepwalk is 64. Default gensim is 100. w2v is larger, but in node2vec paper 100 is ok. Complexity of w2v increases linearly? More important training citcount is too slow: need to reduce dimension. \n\
                             Should try [50] or 100.')
 
-    parser.add_argument('--window-size', type=int, default=10,
+    parser.add_argument('--window-size', type=int, default=15,
                         help='Context size for optimization. Default node2vec is 10. Default deepwalk is 5. Default gensim is 10. W2V is 5, 15-20 shows good performance in some cases (node2vec paper). Complexity of w2v increases linearly. \n\
-                            Should try [10] or 20.')
+                            Should try [15] or 20.')
 
-    parser.add_argument('--negative-sample', type=int, default=10,
-                        help='Number of negative samples. Default gensim is 5. Complexity of w2v increases linearly? \n\
-                            Should try 5 or [10].')
+    parser.add_argument('--negative-sample', type=int, default=5,
+                        help='Number of negative samples. Default gensim is 5. Usually more is better. Complexity of w2v increases linearly? \n\
+                            Should try [5] or 10.')
 
-    parser.add_argument('--iter', type=int, default=10,
+    parser.add_argument('--iter', type=int, default=5,
                         help='Number of epochs over the corpus. Default is 1. Default gensim is 5. More is better, complexity of w2v increases linearly, but optimization time is small part. \n\
-                            Should try 5 or [10].')
+                            Should try [5] or 10.')
 
     parser.add_argument('--workers', type=int, default=multiprocessing.cpu_count() - 2,
                         help='Number of parallel workers. Default node2vec is 8. Default gensim is 3. More threads than cores is a typical technique to speed up. \n\
