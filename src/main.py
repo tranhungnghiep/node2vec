@@ -94,6 +94,9 @@ def parse_args():
     parser.add_argument('--test-year', type=int, default=1996,
                         help='Test year. Default 1996.')
 
+    parser.add_argument('--weight-threshold', type=int, default=0,
+                        help='Specify what weight threshold of network file to use. Default 0: use default value for mag 7 network.')
+
     parser.add_argument('--parallel-node2vec', dest='parallel_node2vec', action='store_true',
                         help='Parallel preprocessing transition probs and simulating walks or not. Default is not parallel node2vec.')
     parser.add_argument('--no-parallel-node2vec', dest='parallel_node2vec', action='store_false')
@@ -130,46 +133,51 @@ def parse_args():
         if not os.path.isdir(largs.root_path_output):
             os.makedirs(largs.root_path_output)
 
-        weight_threshold_2 = 2
-        weight_threshold_3 = 2
-        weight_threshold_4 = 2
-        weight_threshold_5 = 2
-        weight_threshold_6 = 5
-        weight_threshold_7 = 2
-
         if largs.mag_file == 1:
             largs.input = os.path.join(largs.root_path_input, 'PAPER_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
             largs.output = os.path.join(largs.root_path_output, 'PAPER_CITATION_EMB_' + str(largs.test_year) + '.txt')
             largs.directed = True
             largs.weighted = False
         elif largs.mag_file == 2:
-            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_CITATION_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_2) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_CITATION_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_2) + '.txt')
+            if largs.weight_threshold == 0:
+                largs.weight_threshold = 2
+            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_CITATION_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_CITATION_EMB_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
             largs.directed = True
             largs.weighted = True
         elif largs.mag_file == 3:
-            largs.input = os.path.join(largs.root_path_input, 'VENUE_CITATION_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_3) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'VENUE_CITATION_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_3) + '.txt')
+            if largs.weight_threshold == 0:
+                largs.weight_threshold = 2
+            largs.input = os.path.join(largs.root_path_input, 'VENUE_CITATION_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'VENUE_CITATION_EMB_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
             largs.directed = True
             largs.weighted = True
         elif largs.mag_file == 4:
-            largs.input = os.path.join(largs.root_path_input, 'PAPER_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_4) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'PAPER_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_4) + '.txt')
+            if largs.weight_threshold == 0:
+                largs.weight_threshold = 2
+            largs.input = os.path.join(largs.root_path_input, 'PAPER_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'PAPER_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
             largs.directed = False
             largs.weighted = True
         elif largs.mag_file == 5:
-            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_PAPER_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_5) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_PAPER_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_5) + '.txt')
+            if largs.weight_threshold == 0:
+                largs.weight_threshold = 2
+            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_PAPER_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_PAPER_EMB_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
             largs.directed = False
             largs.weighted = True
         elif largs.mag_file == 6:
-            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_VENUE_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_6) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_VENUE_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_6) + '.txt')
+            if largs.weight_threshold == 0:
+                largs.weight_threshold = 5
+            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_VENUE_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_VENUE_EMB_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
             largs.directed = False
             largs.weighted = True
         elif largs.mag_file == 7:
-            largs.input = os.path.join(largs.root_path_input, 'VENUE_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_7) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'VENUE_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_7) + '.txt')
+            if largs.weight_threshold == 0:
+                largs.weight_threshold = 2
+            largs.input = os.path.join(largs.root_path_input, 'VENUE_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'VENUE_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
             largs.directed = False
             largs.weighted = True
 
