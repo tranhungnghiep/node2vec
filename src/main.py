@@ -60,9 +60,9 @@ def parse_args():
                         help='Number of epochs over the corpus. Default is 1. Default gensim is 5. More is better, complexity of w2v increases linearly, but optimization time is small part. \n\
                             Should try 5 or [10].')
 
-    parser.add_argument('--workers', type=int, default=60,
+    parser.add_argument('--workers', type=int, default=multiprocessing.cpu_count() - 2,
                         help='Number of parallel workers. Default node2vec is 8. Default gensim is 3. More threads than cores is a typical technique to speed up. \n\
-                            Should use [60] workers on 32 cores. (Should also run many instances of node2vec for many networks.)')
+                            Should use 60 workers on 32 cores. (Should also run many instances of node2vec for many networks.). But this is a shared server, so only use cpu count - 2.')
 
     parser.add_argument('--p', type=float, default=1,
                         help='Return hyperparameter. Default is 1.')
@@ -130,39 +130,46 @@ def parse_args():
         if not os.path.isdir(largs.root_path_output):
             os.makedirs(largs.root_path_output)
 
+        weight_threshold_2 = 2
+        weight_threshold_3 = 1
+        weight_threshold_4 = 2
+        weight_threshold_5 = 2
+        weight_threshold_6 = 3
+        weight_threshold_7 = 1
+
         if largs.mag_file == 1:
             largs.input = os.path.join(largs.root_path_input, 'PAPER_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
             largs.output = os.path.join(largs.root_path_output, 'PAPER_CITATION_EMB_' + str(largs.test_year) + '.txt')
             largs.directed = True
             largs.weighted = False
         elif largs.mag_file == 2:
-            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_CITATION_EMB_' + str(largs.test_year) + '.txt')
+            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_CITATION_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_2) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_CITATION_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_2) + '.txt')
             largs.directed = True
             largs.weighted = True
         elif largs.mag_file == 3:
-            largs.input = os.path.join(largs.root_path_input, 'VENUE_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'VENUE_CITATION_EMB_' + str(largs.test_year) + '.txt')
+            largs.input = os.path.join(largs.root_path_input, 'VENUE_CITATION_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_3) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'VENUE_CITATION_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_3) + '.txt')
             largs.directed = True
             largs.weighted = True
         elif largs.mag_file == 4:
-            largs.input = os.path.join(largs.root_path_input, 'PAPER_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'PAPER_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '.txt')
+            largs.input = os.path.join(largs.root_path_input, 'PAPER_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_4) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'PAPER_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_4) + '.txt')
             largs.directed = False
             largs.weighted = True
         elif largs.mag_file == 5:
-            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_PAPER_NETWORK_' + str(largs.test_year) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_PAPER_EMB_' + str(largs.test_year) + '.txt')
+            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_PAPER_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_5) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_PAPER_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_5) + '.txt')
             largs.directed = False
             largs.weighted = True
         elif largs.mag_file == 6:
-            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_VENUE_NETWORK_' + str(largs.test_year) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_VENUE_EMB_' + str(largs.test_year) + '.txt')
+            largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_VENUE_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_6) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_VENUE_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_6) + '.txt')
             largs.directed = False
             largs.weighted = True
         elif largs.mag_file == 7:
-            largs.input = os.path.join(largs.root_path_input, 'VENUE_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '.txt')
-            largs.output = os.path.join(largs.root_path_output, 'VENUE_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '.txt')
+            largs.input = os.path.join(largs.root_path_input, 'VENUE_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '_' + str(weight_threshold_7) + '.txt')
+            largs.output = os.path.join(largs.root_path_output, 'VENUE_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '_' + str(weight_threshold_7) + '.txt')
             largs.directed = False
             largs.weighted = True
 
