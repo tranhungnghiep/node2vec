@@ -97,6 +97,10 @@ def parse_args():
     parser.add_argument('--weight-threshold', type=int, default=0,
                         help='Specify what weight threshold of network file to use. Default 0: use default value for mag 7 network.')
 
+    parser.add_argument('--alternative-file', dest='alternative_file', action='store_true',
+                        help='Use altenative files, such as NoneCoAuthor, NoiseProne... Default is not use.')
+    parser.set_defaults(alternative_file=False)
+
     parser.add_argument('--parallel-node2vec', dest='parallel_node2vec', action='store_true',
                         help='Parallel preprocessing transition probs and simulating walks or not. Default is not parallel node2vec.')
     parser.add_argument('--no-parallel-node2vec', dest='parallel_node2vec', action='store_false')
@@ -171,6 +175,9 @@ def parse_args():
                 largs.weight_threshold = 5
             largs.input = os.path.join(largs.root_path_input, 'AUTHOR_SHARE_VENUE_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
             largs.output = os.path.join(largs.root_path_output, 'AUTHOR_SHARE_VENUE_EMB_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
+            if largs.alternative_file:
+                largs.input = os.path.join(largs.root_path_input, 'NoneCoAuthor', 'AUTHOR_SHARE_VENUE_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
+                largs.output = os.path.join(largs.root_path_output, 'NoneCoAuthor', 'AUTHOR_SHARE_VENUE_EMB_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
             largs.directed = False
             largs.weighted = True
         elif largs.mag_file == 7:
