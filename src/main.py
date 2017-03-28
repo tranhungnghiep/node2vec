@@ -111,6 +111,10 @@ def parse_args():
                         help='Do not use test param value (for local test). Accept passed param. Default use test param value.')
     parser.set_defaults(local_test=True)
 
+    parser.add_argument('--second-try', dest='second_try', action='store_true',
+                        help='Second try: use larger hyperparams. Default: first try.')
+    parser.set_defaults(second_try=False)
+
     largs = parser.parse_args()
 
     # TEST:
@@ -136,6 +140,19 @@ def parse_args():
         largs.root_path_output = '/mnt/storage/private/nghiep/Data/CitationCount/MAG/Embeddings/MAG7'
         if not os.path.isdir(largs.root_path_output):
             os.makedirs(largs.root_path_output)
+
+        if largs.second_try:
+            print('Second try, use larger params.')
+            largs.num_walks = 50
+            largs.walk_length = 100
+            largs.dimensions = 100
+            largs.window_size = 20
+            largs.negative_sample = 10
+            largs.iter = 10
+
+            largs.root_path_output = '/mnt/storage/private/nghiep/Data/CitationCount/MAG/Embeddings/MAG7L'
+            if not os.path.isdir(largs.root_path_output):
+                os.makedirs(largs.root_path_output)
 
         if largs.mag_file == 1:
             largs.input = os.path.join(largs.root_path_input, 'PAPER_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
