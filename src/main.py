@@ -115,7 +115,7 @@ def parse_args():
                         help='Hyperparams settings. First try: default (small) settings; Second try: use larger hyperparams. Default: first.')
 
     parser.add_argument('--config', default='normal',
-                        help='Network config. Normal: default config; undirected: networks 1 2 3 as undirected. Default: normal.')
+                        help='Network config. Normal: default config; undirect123: networks 1 2 3 as undirected. Default: normal.')
 
     largs = parser.parse_args()
 
@@ -158,7 +158,7 @@ def parse_args():
             if largs.config == 'normal':
                 largs.directed = True
                 largs.weighted = False
-            elif largs.config == 'undirected':
+            elif largs.config == 'undirect123':
                 largs.directed = False
                 largs.weighted = False
             largs.input = os.path.join(largs.root_path_input, 'PAPER_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
@@ -167,7 +167,7 @@ def parse_args():
             if largs.config == 'normal':
                 largs.directed = True
                 largs.weighted = True
-            elif largs.config == 'undirected':
+            elif largs.config == 'undirect123':
                 largs.directed = False
                 largs.weighted = True
             if largs.weight_threshold == 0:
@@ -178,7 +178,7 @@ def parse_args():
             if largs.config == 'normal':
                 largs.directed = True
                 largs.weighted = True
-            elif largs.config == 'undirected':
+            elif largs.config == 'undirect123':
                 largs.directed = False
                 largs.weighted = True
             if largs.weight_threshold == 0:
