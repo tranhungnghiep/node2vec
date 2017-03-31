@@ -137,22 +137,20 @@ def parse_args():
     # AUTOMATE RUNNING:
     if largs.mag_file != 0:
         largs.root_path_input = '/mnt/storage/private/nghiep/Data/MAG/Unzip/CitCount'
+        largs.root_path_output = '/mnt/storage/private/nghiep/Data/CitationCount/MAG/Embeddings'
 
         if largs.hyperparams == 'first':
             print('First try, use (new) default params.')
-            largs.root_path_output = '/mnt/storage/private/nghiep/Data/CitationCount/MAG/Embeddings/MAG7'
+            largs.root_path_output = os.path.join(largs.root_path_output, 'MAG7')
         elif largs.hyperparams == 'second':
             print('Second try, use larger params.')
-            largs.root_path_output = '/mnt/storage/private/nghiep/Data/CitationCount/MAG/Embeddings/MAG7L'
+            largs.root_path_output = os.path.join(largs.root_path_output, 'MAG7L')
             largs.num_walks = 50
             largs.walk_length = 100
             largs.dimensions = 100
             largs.window_size = 20
             largs.negative_sample = 10
             largs.iter = 10
-
-        if not os.path.isdir(largs.root_path_output):
-            os.makedirs(largs.root_path_output)
 
         if largs.mag_file == 1:
             if largs.config == 'normal':
@@ -161,6 +159,7 @@ def parse_args():
             elif largs.config == 'undirect123':
                 largs.directed = False
                 largs.weighted = False
+                largs.root_path_output = os.path.join(largs.root_path_output, 'undirect123')
             largs.input = os.path.join(largs.root_path_input, 'PAPER_CITATION_NETWORK_' + str(largs.test_year) + '.txt')
             largs.output = os.path.join(largs.root_path_output, 'PAPER_CITATION_EMB_' + str(largs.test_year) + '.txt')
         elif largs.mag_file == 2:
@@ -170,6 +169,7 @@ def parse_args():
             elif largs.config == 'undirect123':
                 largs.directed = False
                 largs.weighted = True
+                largs.root_path_output = os.path.join(largs.root_path_output, 'undirect123')
             if largs.weight_threshold == 0:
                 largs.weight_threshold = 2
             largs.input = os.path.join(largs.root_path_input, 'AUTHOR_CITATION_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
@@ -181,6 +181,7 @@ def parse_args():
             elif largs.config == 'undirect123':
                 largs.directed = False
                 largs.weighted = True
+                largs.root_path_output = os.path.join(largs.root_path_output, 'undirect123')
             if largs.weight_threshold == 0:
                 largs.weight_threshold = 2
             largs.input = os.path.join(largs.root_path_input, 'VENUE_CITATION_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
@@ -216,6 +217,9 @@ def parse_args():
                 largs.weight_threshold = 2
             largs.input = os.path.join(largs.root_path_input, 'VENUE_SHARE_AUTHOR_NETWORK_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
             largs.output = os.path.join(largs.root_path_output, 'VENUE_SHARE_AUTHOR_EMB_' + str(largs.test_year) + '_' + str(largs.weight_threshold) + '.txt')
+
+    if not os.path.isdir(largs.root_path_output):
+        os.makedirs(largs.root_path_output)
 
     return largs
 
@@ -298,7 +302,7 @@ def main(args):
     nx_G = read_graph()
     print('Read graph time: ' + str(time.time() - base_time)); base_time = time.time()
 
-    if 1+1 == 0 and args.parallel_node2vec:
+    if False and args.parallel_node2vec:
         G = node2vec_parallel.Graph(nx_G, args.directed, args.p, args.q, args.workers)
     else:
         G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
@@ -307,7 +311,7 @@ def main(args):
     print('Preprocess transition probability time: ' + str(time.time() - base_time)); base_time = time.time()
 
     walks = G.simulate_walks(args.num_walks, args.walk_length)
-    print('Simulate walks ' + '(Parallel=' + str(1+1==0 and args.parallel_node2vec) + ') time : ' + str(time.time() - base_time)); base_time = time.time()
+    print('Simulate walks ' + '(Parallel=' + str(False and args.parallel_node2vec) + ') time : ' + str(time.time() - base_time)); base_time = time.time()
 
     learn_embeddings(walks)
     print('Compute w2v embeddings time: ' + str(time.time() - base_time)); base_time = time.time()
