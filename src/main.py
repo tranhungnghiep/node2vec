@@ -156,6 +156,7 @@ def parse_args():
             if largs.config == 'normal':
                 largs.directed = True
                 largs.weighted = False
+                largs.root_path_output = os.path.join(largs.root_path_output, 'direct123')
             elif largs.config == 'undirect123':
                 largs.directed = False
                 largs.weighted = False
@@ -166,6 +167,7 @@ def parse_args():
             if largs.config == 'normal':
                 largs.directed = True
                 largs.weighted = True
+                largs.root_path_output = os.path.join(largs.root_path_output, 'direct123')
             elif largs.config == 'undirect123':
                 largs.directed = False
                 largs.weighted = True
@@ -178,6 +180,7 @@ def parse_args():
             if largs.config == 'normal':
                 largs.directed = True
                 largs.weighted = True
+                largs.root_path_output = os.path.join(largs.root_path_output, 'direct123')
             elif largs.config == 'undirect123':
                 largs.directed = False
                 largs.weighted = True
